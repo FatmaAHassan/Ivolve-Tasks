@@ -1,30 +1,22 @@
-## Screenshots
-
-###LAB1  Java Application Build with Gradle
-This project demonstrates how to build, test, and package a Java application using **Gradle** on a Linux environment (WSL).
-
-### Build Success
-![Build](screenshots/build.jpg)
-
-### Application Running
-![Run](screenshots/lab1.jpg)	
-
 
 ## LAB2 Java Maven Project
 
 This project demonstrates a Java application built with **Maven**.
 
+### Commands
+sudo apt update
+sudo apt install maven -y
+mvn -v
+
+git clone https://github.com/Ibrahim-Adel15/build2.git
+cd build2
+
+mvn test
+mvn package
+
+java -jar target/hello-ivolve-1.0-SNAPSHOT.jar
+curl http://localhost:8080
+
 ### Application Running
-![Run](screenshots/lab2.jpg)
+![Run](lab2.jpg)
 
----
-
-## LAB3 – Run Java Spring Boot App in a Container (Docker)
-
-This lab demonstrates how to run a **Java Spring Boot** application inside a **Docker container** using Maven.
-
-### Build Success
-![Build](screenshots/lab3.jpg)
-
-### Application Running
-![Run](screenshots/lab3run.jpg)
