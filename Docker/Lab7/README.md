@@ -62,7 +62,6 @@ Create a named volume to store Nginx logs:
 ```bash
 docker volume create nginx_logs
 ```
-
 ```bash
 docker volume ls
 ```
