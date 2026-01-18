@@ -118,7 +118,7 @@ Push the image:
 
 ---
 
-## 📸 Screenshots (Lab 7 Execution Result)
+## 📸 Screenshots (Lab 9 Execution Result)
 
 ![Build](screenshots/lab9-5.jpg)
 ![Build](screenshots/lab9-4.jpg)
