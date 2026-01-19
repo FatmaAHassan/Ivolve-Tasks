@@ -1,4 +1,5 @@
-### Lab 10: Node Isolation Using Taints in Kubernetes
+# Lab 10: Node Isolation Using Taints in Kubernetes
+
 ## Objective
 The objective of this lab is to demonstrate node isolation in Kubernetes using taints.
 A taint is applied to a worker node to prevent pods from being scheduled on it.
