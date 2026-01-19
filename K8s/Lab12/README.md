@@ -57,11 +57,11 @@ kubectl describe secret mysql-secret
 
 ## 📸 Screenshots (Lab 12 Execution Result)
 
-![Build](screenshots/kubectl describe configmap.jpg)
+![Build](screenshots/kubectldescribeconfigmap.jpg)
 ![Build](screenshots/mysql-configmap.jpg)
-![Build](screenshots/describe secret mysql-secret.jpg)
-![Build](screenshots/Verify Resources.jpg)
-![Build](screenshots/Create mysqlSecret.jpg)
+![Build](screenshots/describesecretmysql-secret.jpg)
+![Build](screenshots/VerifyResources.jpg)
+![Build](screenshots/CreatemysqlSecret.jpg)
 ---
 
 ## Author
