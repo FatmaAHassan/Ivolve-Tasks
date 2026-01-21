@@ -142,7 +142,8 @@ Expected:
 . Service: ClusterIP=None
 
 ![Build](screenshots/get.jpg)
-![Build](screenshots/stateful.jpg.jpg)
+
+![Build](screenshots/stateful.jpg)
 
 
 ### Step 5 : Connect to MySQL
