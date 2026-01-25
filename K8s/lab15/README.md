@@ -135,9 +135,6 @@ kubectl apply -f service.yaml
 # Check pods status
 kubectl get pods -w
 
-# If pods are stuck or image updated, delete old pods
-kubectl delete pod -l app=nodejs
-
 # Reapply deployment if updated
 kubectl apply -f deployment.yaml
 
