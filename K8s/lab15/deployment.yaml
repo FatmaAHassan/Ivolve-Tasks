@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nodejs
+  template:
+    metadata:
+      labels:
+        app: nodejs
+    spec:
+      tolerations:
+        - key: "node"
+          operator: "Equal"
+          value: "worker"
+          effect: "NoSchedule"
+      containers:
+        - name: nodejs
+          image: fatmaahassan/kubernets-app:lab9
+          command: ["node", "-e", "require('http').createServer((req,res)=>res.end('Hello from Node.js!')).listen(3000, '0.0.0.0')"]
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: nodejs-config
+            - secretRef:
+                name: nodejs-secret
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nodejs-pvc
+
