@@ -1,4 +1,4 @@
-# Lab16-README.md - Kubernetes Init Container for Pre-Deployment Database Setup
+# Lab16 - Kubernetes Init Container for Pre-Deployment Database Setup
 
 ## 🎯 Objective
 
