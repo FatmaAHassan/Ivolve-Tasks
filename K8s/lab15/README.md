@@ -83,7 +83,6 @@ spec:
       containers:
         - name: nodejs
           image: fatmaahassan/kubernets-app:lab9
-          command: ["node", "-e", "require('http').createServer((req,res)=>res.end('Hello from Node.js!')).listen(3000, '0.0.0.0')"]
           ports:
             - containerPort: 3000
           envFrom:
@@ -145,24 +144,6 @@ kubectl apply -f deployment.yaml
 # Describe pods if needed
 kubectl describe pod <pod-name>
 ```
-
-
-### Step4 : 4️⃣ Access the Node.js App
-
-Option 1: Port-forward
-```bash
-kubectl port-forward svc/nodejs-service 8080:80
-curl http://localhost:8080
-# Output: Hello from Node.js!
-```
-Option 2: Minikube service
-```bash
-minikube service nodejs-service
-# Opens app in browser automatically
-```
-
-![Build](screenshots/browser.jpg)
-
 ---
 
 ## Author

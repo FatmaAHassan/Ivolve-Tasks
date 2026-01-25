@@ -20,7 +20,6 @@ spec:
       containers:
         - name: nodejs
           image: fatmaahassan/kubernets-app:lab9
-          command: ["node", "-e", "require('http').createServer((req,res)=>res.end('Hello from Node.js!')).listen(3000, '0.0.0.0')"]
           ports:
             - containerPort: 3000
           envFrom:
