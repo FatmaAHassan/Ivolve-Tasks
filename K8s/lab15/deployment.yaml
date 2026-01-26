@@ -18,7 +18,6 @@ spec:
           value: "worker"
           effect: "NoSchedule"
 
-
       initContainers:
         - name: init-mysql
           image: mysql:5.7
@@ -28,11 +27,9 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: mysql-root-password
+
             - name: DB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: db-config
-                  key: DB_HOST
+              value: "mysql-0.mysql"
 
             - name: DB_NAME
               valueFrom:
@@ -87,148 +84,4 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: nodejs-pvc
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
