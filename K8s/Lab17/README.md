@@ -165,15 +165,15 @@ kubectl describe pod <POD_NAME>
 Look for:
 
 ```text
-Requests:
-  cpu:     0.5
-  memory:  1Gi
-Limits:
-  cpu:     1
-  memory:  2Gi
+requests:
+    memory: "1Gi"
+        cpu: "1"
+    limits:
+        memory: "2Gi"
+        cpu: "2"
 ```
-![Build](screenshots/nodejs-pod.jpg.jpg)
-![Build](screenshots/details.jpg.jpg)
+![Build](screenshots/nodejs-pod.jpg)
+![Build](screenshots/details.jpg)
 ---
 
 ### 4️⃣ Monitor Resource Usage
@@ -190,7 +190,7 @@ Sample output:
 NAME           CPU(cores)   MEMORY(bytes)
 nodejs-app     10m          30Mi
 ```
-![Build](screenshots/top-pod.jpg.jpg)
+![Build](screenshots/top-pod.jpg)
 ---
 
 ## Key Concepts
