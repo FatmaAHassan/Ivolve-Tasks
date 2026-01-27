@@ -19,69 +19,73 @@ spec:
           effect: "NoSchedule"
 
       initContainers:
-        - name: init-mysql
-          image: mysql:5.7
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-root-password
-
-            - name: DB_HOST
-              value: "mysql-0.mysql"
-
-            - name: DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: db-config
-                  key: DB_NAME
-
-            - name: DB_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: db-config
-                  key: DB_USER
-
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: DB_PASSWORD
-
-          command:
-            - sh
-            - -c
-            - |
-              echo "Waiting for MySQL...";
-              until mysql -h $DB_HOST -u root -p$MYSQL_ROOT_PASSWORD -e "SELECT 1"; do
-                sleep 5;
-              done;
-
-              echo "Creating database and user...";
-              mysql -h $DB_HOST -u root -p$MYSQL_ROOT_PASSWORD <<EOF
-              CREATE DATABASE IF NOT EXISTS ivolve;
-              CREATE USER IF NOT EXISTS 'ivolve_user'@'%' IDENTIFIED BY 'ivolve123';
-              GRANT ALL PRIVILEGES ON ivolve.* TO 'ivolve_user'@'%';
-              FLUSH PRIVILEGES;
-              EOF
+      - name: init-mysql
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_PASSWORD
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: db-config
+              key: DB_HOST
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: db-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: db-config
+              key: DB_USER
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for MySQL..."
+          until mysql -h $DB_HOST -u root -p$MYSQL_ROOT_PASSWORD -e "SELECT 1"; do
+            sleep 2
+          done
+          echo "Creating database and user..."
+          mysql -h $DB_HOST -u root -p$MYSQL_ROOT_PASSWORD <<EOF
+          CREATE DATABASE IF NOT EXISTS $DB_NAME;
+          CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
+          GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
+          FLUSH PRIVILEGES;
+          EOF
 
       containers:
-        - name: nodejs
-          image: fatmaahassan/kubernets-app:lab9
-          ports:
-            - containerPort: 3000
-          envFrom:
-            - configMapRef:
-                name: nodejs-config
-            - secretRef:
-                name: nodejs-secret
-          volumeMounts:
-            - name: data
-              mountPath: /usr/src/app/data
+      - name: nodejs
+        image: fatmaahassan/kubernets-app:lab9
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: nodejs-config
+        - secretRef:
+            name: nodejs-secret
+        volumeMounts:
+        - name: data
+          mountPath: /usr/src/app/data
+        resources:            # <<<< الجزء الجديد هنا
+          requests:
+            memory: "1Gi"
+            cpu: "1"
+          limits:
+            memory: "2Gi"
+            cpu: "2"
 
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: nodejs-pvc
+      - name: data
+        persistentVolumeClaim:
+          claimName: nodejs-pvc
 
