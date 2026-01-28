@@ -1,121 +1,169 @@
-# Lab 19: Node-Wide Pod Management with DaemonSet
+# Lab 20: Securing Kubernetes with RBAC and Service Accounts
 
 ## Objective
-- Create a namespace for monitoring.
-- Deploy a DaemonSet for Prometheus Node Exporter that tolerates all taints.
-- Verify that a Node Exporter pod is scheduled on each node.
-- Confirm that metrics are exposed correctly on port `9100`.
+This lab demonstrates how to secure Kubernetes access using **RBAC** and **Service Accounts** by granting limited, read-only permissions.
+
+---
+
+## Lab Requirements
+- Create a ServiceAccount for Jenkins.
+- Create a Role with read-only access to Pods.
+- Bind the Role to the ServiceAccount.
+- Validate permissions using `kubectl auth can-i`.
+
+---
+
+## Files Used in This Lab
+- `jenkins-sa.yaml`
+- `pod-reader-role.yaml`
+- `jenkins-rolebinding.yaml`
 
 ---
 
 ## Steps
 
-### 1. Create monitoring namespace
+### 1️⃣ Create Namespace
+
 ```bash
-kubectl create namespace monitoring
+kubectl create namespace ivolve
 kubectl get ns
 ```
 
-![Namespace created](screenshots/ns.jpg)
-
+![build](screenshots/1.jpg)
 ---
 
-### 2. Deploy Prometheus Node Exporter DaemonSet
+### 2️⃣ Create Service Account
 
-Create a YAML file `node-exporter-daemonset.yaml`:
+`jenkins-sa.yaml`
 
 ```yaml
-apiVersion: apps/v1
-kind: DaemonSet
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-  name: node-exporter
-  namespace: monitoring
-  labels:
-    app: node-exporter
-spec:
-  selector:
-    matchLabels:
-      app: node-exporter
-  template:
-    metadata:
-      labels:
-        app: node-exporter
-    spec:
-      tolerations:
-        - operator: "Exists"   # Tolerate all node taints
-      containers:
-        - name: node-exporter
-          image: prom/node-exporter:v1.7.0
-          ports:
-            - containerPort: 9100
-              name: metrics
+  name: jenkins-sa
+  namespace: ivolve
 ```
 
-Apply the DaemonSet:
-
+Apply:
 ```bash
-kubectl apply -f node-exporter-daemonset.yaml
+kubectl apply -f jenkins-sa.yaml
+kubectl get sa -n ivolve
 ```
-![DaemonSet applied](screenshots/network.jpg)
+
+![build](screenshots/2.jpg)
 
 ---
 
-### 3. Verify Node Exporter pods on all nodes
+### 3️⃣ Generate Service Account Token
+
+Generate a token for the Service Account:
 
 ```bash
-kubectl get pods -n monitoring -o wide
-kubectl get daemonset -n monitoring
+kubectl create token jenkins-sa -n ivolve
+```
+![build](screenshots/3.jpg)
+
+--- 
+
+### 4️⃣ Create Role (Read-Only Pods)
+
+`pod-reader-role.yaml`
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: ivolve
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
 ```
 
-* Each node should have **one pod** running.
-* `DESIRED` pods = number of nodes
-* `READY` pods should eventually match `DESIRED`.
-
-![Pods verification](screenshots/get.jpg)
-
-
----
-
-### 4. Confirm metrics exposure
-
-#### Option 1: Using port-forward
-
+Apply:
 ```bash
-kubectl port-forward -n monitoring pod/<node-exporter-pod-name> 9100:9100
-```
-![Port forward](screenshots/port.jpg)
-
-Then open in browser:
-
-```
-http://localhost:9100/metrics
+kubectl apply -f pod-reader-role.yaml
+kubectl get role -n ivolve
 ```
 
-![Metrics page](screenshots/localhost.jpg)
-
+![build](screenshots/4.jpg)
 ---
 
-## Notes
+### 5️⃣ Create RoleBinding
 
-* Node Exporter is written in Go, so you may see Go runtime metrics like:
+`jenkins-rolebinding.yaml`
 
-  * `go_goroutines`
-  * `go_memstats_*`
-* These are normal and in addition to node metrics like CPU, memory, network, and disk.
-* On Minikube, it may take a few seconds for all pods to reach `Running` status as the image downloads.
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: ivolve
+subjects:
+- kind: ServiceAccount
+  name: jenkins-sa
+  namespace: ivolve
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+Apply:
+```bash
+kubectl apply -f jenkins-rolebinding.yaml
+kubectl get rolebinding -n ivolve
+```
+
+![build](screenshots/5.jpg)
+---
+
+### 6️⃣ Validate Permissions
+
+✔ Can list pods:
+```bash
+kubectl auth can-i list pods \
+  --as=system:serviceaccount:ivolve:jenkins-sa \
+  -n ivolve
+```
+
+Expected:
+```text
+yes
+```
+
+❌ Cannot create pods:
+```bash
+kubectl auth can-i create pods \
+  --as=system:serviceaccount:ivolve:jenkins-sa \
+  -n ivolve
+```
+
+Expected:
+```text
+no
+```
+
+![build](screenshots/6.jpg)
+---
+
+## Key Notes
+- Roles are **namespace-scoped**
+- RoleBinding is required to activate permissions
+- ServiceAccount without binding has **zero access**
 
 ---
 
 ## Validation Checklist
-
-* [x] Namespace `monitoring` created
-* [x] DaemonSet deployed and tolerates all taints
-* [x] One Node Exporter pod scheduled per node
-* [x] Metrics exposed correctly on port `9100`
-* [x] Metrics include CPU, memory, disk, and network stats
+- [x] Namespace created
+- [x] ServiceAccount created
+- [x] Generate & retrieve ServiceAccount token
+- [x] Role created with read-only access
+- [x] RoleBinding applied
+- [x] Permissions validated successfully
 
 ---
 
 ## Author
-
 Fatma Alaa Hassan
