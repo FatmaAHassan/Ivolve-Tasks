@@ -61,6 +61,12 @@ pipeline {
             }
         }
 
+       stage('Test Kubernetes') {
+           steps {
+                   sh 'kubectl get nodes'
+           }
+       }
+
         stage('Deploy to Kubernetes') {
             steps {
                 dir('Jenkins/Lab22/Lab22-App') {
