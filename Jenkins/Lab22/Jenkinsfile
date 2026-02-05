@@ -60,15 +60,13 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                dir('Jenkins/Lab22/Lab22-App') {
-                    sh 'kubectl apply -f deployment.yaml'
-                }
+       stage('Deploy to Kubernetes') {
+           steps {
+               dir('Jenkins/Lab22/Lab22-App') {
+                   sh 'kubectl apply -f deployment.yaml'
+                 }
             }
         }
-    }
 
     post {
         success {
