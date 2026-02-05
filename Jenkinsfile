@@ -8,6 +8,19 @@ pipeline {
 
     stages {
 
+        stage('Clone Code') {
+            steps {
+                // Checkout git مع تحديث submodules
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/lab22-jenkins']],
+                    doGenerateSubmoduleConfigurations: true,
+                    extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true]],
+                    userRemoteConfigs: [[url: 'https://github.com/FatmaAHassan/Ivolve-Tasks.git']]
+                ])
+            }
+        }
+
         stage('Unit Test') {
             steps {
                 dir('Jenkins/Lab22/Jenkins_App') {
