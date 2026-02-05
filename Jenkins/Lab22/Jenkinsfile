@@ -2,19 +2,18 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "fatmaahassan/java_app"
-        TAG = "${BUILD_NUMBER}"
+        IMAGE_NAME = 'fatmaahassan/java_app'
+        TAG = '13'
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
-                checkout scm
+                git branch: 'lab22-jenkins', url: 'https://github.com/FatmaAHassan/Ivolve-Tasks.git'
             }
         }
 
-        stage('Unit Test') {
+        stage('Run Unit Tests') {
             steps {
                 dir('Jenkins/Lab22/Lab22-App') {
                     sh 'mvn test'
@@ -48,6 +47,7 @@ pipeline {
                     sh '''
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                         docker push $IMAGE_NAME:$TAG
+                        docker image rm $IMAGE_NAME:$TAG
                     '''
                 }
             }
@@ -60,17 +60,20 @@ pipeline {
                 }
             }
         }
-       stage('Deploy to Kubernetes') {
-           steps {
-               dir('Jenkins/Lab22/Lab22-App') {
-                   sh 'kubectl apply -f deployment.yaml'
-                 }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                dir('Jenkins/Lab22/Lab22-App') {
+                    // لو الكلاستر يحتاج credentials خليكي متأكدة ان kubectl متظبط
+                    sh 'kubectl apply -f deployment.yaml'
+                }
             }
         }
+    }
 
     post {
         success {
-            echo 'Pipeline Successful 🎉'
+            echo 'Pipeline Finished ✅'
         }
         failure {
             echo 'Pipeline Failed ❌'
