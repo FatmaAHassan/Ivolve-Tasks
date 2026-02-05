@@ -23,7 +23,7 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-                dir('Jenkins/Lab22/Jenkins_App') {
+                dir('.') { // root المشروع
                     sh 'mvn test'
                 }
             }
@@ -31,7 +31,7 @@ pipeline {
 
         stage('Build App') {
             steps {
-                dir('Jenkins/Lab22/Jenkins_App') {
+                dir('.') {
                     sh 'mvn clean package'
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir('Jenkins/Lab22/Jenkins_App') {
+                dir('.') {
                     sh "docker build -t $IMAGE_NAME:$TAG ."
                 }
             }
@@ -68,7 +68,7 @@ pipeline {
 
         stage('Update deployment.yaml') {
             steps {
-                dir('Jenkins/Lab22/Jenkins_App') {
+                dir('.') {
                     sh '''
                         sed -i "s|image:.*|image: $IMAGE_NAME:$TAG|" deployment.yaml
                     '''
@@ -78,7 +78,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                dir('Jenkins/Lab22/Jenkins_App') {
+                dir('.') {
                     sh 'kubectl apply -f deployment.yaml -n jenkins'
                 }
             }
