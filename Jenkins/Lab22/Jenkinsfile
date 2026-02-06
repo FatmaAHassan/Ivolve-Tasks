@@ -1,89 +1,181 @@
 pipeline {
+
     agent any
 
+
+
     environment {
+
         IMAGE_NAME = 'fatmaahassan/java_app'
+
         TAG = '13'
+
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+
     }
+
+
 
     stages {
+
         stage('Checkout Code') {
+
             steps {
+
                 git branch: 'lab22-jenkins', url: 'https://github.com/FatmaAHassan/Ivolve-Tasks.git'
+
             }
+
         }
+
+
 
         stage('Run Unit Tests') {
+
             steps {
+
                 dir('Jenkins/Lab22/Lab22-App') {
+
                     sh 'mvn test'
+
                 }
+
             }
+
         }
+
+
 
         stage('Build App') {
+
             steps {
+
                 dir('Jenkins/Lab22/Lab22-App') {
+
                     sh 'mvn clean package'
+
                 }
+
             }
+
         }
+
+
 
         stage('Build Docker Image') {
+
             steps {
+
                 dir('Jenkins/Lab22/Lab22-App') {
+
                     sh 'docker build -t $IMAGE_NAME:$TAG .'
+
                 }
+
             }
+
         }
+
+
 
         stage('Push Image to DockerHub') {
+
             steps {
+
                 withCredentials([usernamePassword(
+
                     credentialsId: 'dockerhub-creds',
+
                     usernameVariable: 'DOCKER_USER',
+
                     passwordVariable: 'DOCKER_PASS'
+
                 )]) {
+
                     sh '''
+
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+
                         docker push $IMAGE_NAME:$TAG
+
                         docker image rm $IMAGE_NAME:$TAG
+
                     '''
+
                 }
+
             }
+
         }
+
+
 
         stage('Update deployment.yaml') {
+
             steps {
+
                 dir('Jenkins/Lab22/Lab22-App') {
-                    sh 'sed -i "s|image:.*|image: $IMAGE_NAME:$TAG|" deployment.yaml'
+
+                    sh "sed -i 's|image:.*|image: ${IMAGE_NAME}:${TAG}|' deployment.yaml"
+
                 }
+
             }
+
         }
+
+
 
        stage('Test Kubernetes') {
+
            steps {
-                   sh 'kubectl get nodes'
+
+               sh 'kubectl --kubeconfig=${KUBECONFIG} get nodes'
+
            }
+
        }
 
+
+
         stage('Deploy to Kubernetes') {
+
             steps {
+
                 dir('Jenkins/Lab22/Lab22-App') {
-                    // لو الكلاستر يحتاج credentials خليكي متأكدة ان kubectl متظبط
-                    sh 'kubectl apply -f deployment.yaml'
+
+                    sh 'kubectl --kubeconfig=${KUBECONFIG} apply -f deployment.yaml'
+
                 }
+
             }
+
         }
+
     }
+
+
 
     post {
-        success {
-            echo 'Pipeline Finished ✅'
-        }
-        failure {
-            echo 'Pipeline Failed ❌'
-        }
-    }
-}
 
+        always {
+
+            echo 'Pipeline process finished.'
+
+        }
+
+        success {
+
+            echo 'Pipeline Finished ✅'
+
+        }
+
+        failure {
+
+            echo 'Pipeline Failed ❌'
+
+        }
+
+    }
+
+}
