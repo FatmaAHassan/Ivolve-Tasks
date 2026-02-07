@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Clone Source') {
             steps {
-               git branch: 'lab22-jenkins', url: 'https://github.com/FatmaAHassan/Ivolve-Tasks.git'
+                git branch: 'lab22-jenkins', url: 'https://github.com/FatmaAHassan/Ivolve-Tasks.git'
             }
         }
 
@@ -24,7 +24,7 @@ pipeline {
             }
         }
 
-    stage('Build App') {
+        stage('Build App') {
             steps {
                 dir('Jenkins/Lab22/Lab22-App') {
                     sh "mvn clean package -DskipTests"
@@ -32,7 +32,7 @@ pipeline {
             }
         }
 
-    stage('Build Image') {
+        stage('Build Image') {
             steps {
                 script {
                     dir('Jenkins/Lab22/Lab22-App') {
@@ -41,6 +41,7 @@ pipeline {
                 }
             }
         }
+
         stage('Scan Image') {
             steps {
                 echo "Scanning image for vulnerabilities..."
@@ -63,7 +64,7 @@ pipeline {
             }
         }
 
-       stage('Deploy On K8s') {
+        stage('Deploy On K8s') {
             steps {
                 script {
                     dir('Jenkins/Lab22/Lab22-App') {
@@ -72,6 +73,7 @@ pipeline {
                 }
             }
         }
+    }
 
     post {
         always {
