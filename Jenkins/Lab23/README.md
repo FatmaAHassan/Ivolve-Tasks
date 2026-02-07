@@ -228,7 +228,7 @@ pipeline {
 ## 📸 Screenshots
 
 ![Build](screenshots/lab.jpg)
-
+![Build](screenshots/agent.jpg)
 Add Jenkins pipeline Photo .
 
 ---
