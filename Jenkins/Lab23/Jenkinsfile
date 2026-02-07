@@ -24,20 +24,23 @@ pipeline {
             }
         }
 
-        stage('Build App') {
+    stage('Build App') {
             steps {
-                sh "mvn clean package -DskipTests"
-            }
-        }
-
-        stage('Build Image') {
-            steps {
-                script {
-                    buildImage(IMAGE_NAME, IMAGE_TAG)
+                dir('Jenkins/Lab22/Lab22-App') {
+                    sh "mvn clean package -DskipTests"
                 }
             }
         }
 
+    stage('Build Image') {
+            steps {
+                script {
+                    dir('Jenkins/Lab22/Lab22-App') {
+                        buildImage(IMAGE_NAME, IMAGE_TAG)
+                    }
+                }
+            }
+        }
         stage('Scan Image') {
             steps {
                 echo "Scanning image for vulnerabilities..."
@@ -60,14 +63,15 @@ pipeline {
             }
         }
 
-        stage('Deploy On K8s') {
+       stage('Deploy On K8s') {
             steps {
                 script {
-                    deployK8s(IMAGE_NAME, IMAGE_TAG)  
+                    dir('Jenkins/Lab22/Lab22-App') {
+                        deployK8s(IMAGE_NAME, IMAGE_TAG)  
+                    }
                 }
             }
         }
-    }
 
     post {
         always {
