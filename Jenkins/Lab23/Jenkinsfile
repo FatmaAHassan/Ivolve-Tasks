@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Clone Source') {
             steps {
-                git 'https://github.com/Ibrahim-Adel15/Jenkins_App.git'
+               git branch: 'lab22-jenkins', url: 'https://github.com/FatmaAHassan/Ivolve-Tasks.git'
             }
         }
 
