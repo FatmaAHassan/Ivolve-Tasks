@@ -26,6 +26,7 @@ pipeline {
 
         stage('Build App') {
             steps {
+                dir('Jenkins/Lab22/Lab22-App') {
                     sh "mvn clean package -DskipTests"
                 }
             }
@@ -33,7 +34,9 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                script {
+                dir('Jenkins/Lab22/Lab22-App') {
+                    script {
+                        // بعتنا الاتنين باراميتر للمكتبة
                         buildImage(IMAGE_NAME, IMAGE_TAG)
                     }
                 }
@@ -58,13 +61,17 @@ pipeline {
 
         stage('Remove Image Locally') {
             steps {
-                sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true"
+                script {
+                    // ناديتها كـ script عشان نبعت الباراميترز صح
+                    removeImage(IMAGE_NAME, IMAGE_TAG)
+                }
             }
         }
 
         stage('Deploy On K8s') {
             steps {
-                script {
+                dir('Jenkins/Lab22/Lab22-App') {
+                    script {
                         deployK8s(IMAGE_NAME, IMAGE_TAG)  
                     }
                 }
