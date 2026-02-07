@@ -1,4 +1,4 @@
-# 🚀 Lab 22: Jenkins Pipeline for Java App Deployment (My Way)
+# 🚀 Lab 22: Jenkins Pipeline for Java App Deployment
 
 This lab demonstrates how to build a **Jenkins Pipeline** to deploy a Java application to a Kubernetes cluster in a clean and organized way.
 
