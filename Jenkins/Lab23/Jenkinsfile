@@ -19,7 +19,7 @@ pipeline {
         stage('Run Unit Test') {
             steps {
                 script {
-                    unitTest() 
+                    runUnitTest() 
                 }
             }
         }
@@ -33,7 +33,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    dockerBuild(IMAGE_NAME, IMAGE_TAG)
+                    buildImage(IMAGE_NAME, IMAGE_TAG)
                 }
             }
         }
@@ -63,7 +63,7 @@ pipeline {
         stage('Deploy On K8s') {
             steps {
                 script {
-                    k8sDeploy(IMAGE_NAME, IMAGE_TAG)  
+                    deployK8s(IMAGE_NAME, IMAGE_TAG)  
                 }
             }
         }
