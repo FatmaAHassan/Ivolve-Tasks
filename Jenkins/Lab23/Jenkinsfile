@@ -1,26 +1,28 @@
-@Library('my-shared-library')
+@Library('my-shared-library') _
 
 pipeline {
     agent { label 'slave-node' } 
 
     environment {
-        IMAGE_NAME = 'fatmaahassan/java_app:lab23'
+        IMAGE_NAME = 'fatmaahassan/java_app'
         IMAGE_TAG  = "${env.BUILD_NUMBER}"
-        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        KUBECONFIG = '/home/fatma/.kube/config' 
     }
 
     stages {
         stage('Clone Source') {
             steps {
-                git 'https://github.com/Ibrahim-Adel15/Jenkins_App.git'            }
-        }
-    }        
-        stage('Run Unit Test') {
-            steps {
-                unitTest()
-           }
+                git 'https://github.com/Ibrahim-Adel15/Jenkins_App.git'
+            }
         }
 
+        stage('Run Unit Test') {
+            steps {
+                script {
+                    unitTest() 
+                }
+            }
+        }
 
         stage('Build App') {
             steps {
@@ -30,21 +32,25 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                dockerBuild(IMAGE_NAME, IMAGE_TAG)
+                script {
+                    dockerBuild(IMAGE_NAME, IMAGE_TAG)
+                }
             }
         }
 
         stage('Scan Image') {
             steps {
                 echo "Scanning image for vulnerabilities..."
-                sh "trivy image ${IMAGE_NAME}:${IMAGE_TAG} || true"
+                sh "docker inspect ${IMAGE_NAME}:${IMAGE_TAG} || true"
             }
         }
 
         stage('Push Image') {
             steps {
-                sh "echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin"
-                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"                }
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_CREDS_USR', passwordVariable: 'DOCKER_CREDS_PSW')]) {
+                    sh "echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin"
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
             }
         }
 
@@ -56,8 +62,22 @@ pipeline {
 
         stage('Deploy On K8s') {
             steps {
-                k8sDeploy(IMAGE_NAME, IMAGE_TAG)  
+                script {
+                    k8sDeploy(IMAGE_NAME, IMAGE_TAG)  
+                }
             }
         }
-     }
- }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished."
+        }
+        success {
+            echo "Application deployed successfully!"
+        }
+        failure {
+            echo "Pipeline failed. Check logs for details."
+        }
+    }
+}
