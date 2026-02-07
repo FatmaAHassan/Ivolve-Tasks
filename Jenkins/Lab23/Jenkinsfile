@@ -1,0 +1,63 @@
+@Library('my-shared-library')
+
+pipeline {
+    agent { label 'slave-node' } 
+
+    environment {
+        IMAGE_NAME = 'fatmaahassan/java_app:lab23'
+        IMAGE_TAG  = "${env.BUILD_NUMBER}"
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+    }
+
+    stages {
+        stage('Clone Source') {
+            steps {
+                git 'https://github.com/Ibrahim-Adel15/Jenkins_App.git'            }
+        }
+    }        
+        stage('Run Unit Test') {
+            steps {
+                unitTest()
+           }
+        }
+
+
+        stage('Build App') {
+            steps {
+                sh "mvn clean package -DskipTests"
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                dockerBuild(IMAGE_NAME, IMAGE_TAG)
+            }
+        }
+
+        stage('Scan Image') {
+            steps {
+                echo "Scanning image for vulnerabilities..."
+                sh "trivy image ${IMAGE_NAME}:${IMAGE_TAG} || true"
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh "echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin"
+                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"                }
+            }
+        }
+
+        stage('Remove Image Locally') {
+            steps {
+                sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true"
+            }
+        }
+
+        stage('Deploy On K8s') {
+            steps {
+                k8sDeploy(IMAGE_NAME, IMAGE_TAG)  
+            }
+        }
+     }
+ }
