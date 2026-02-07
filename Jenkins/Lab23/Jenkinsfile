@@ -1,0 +1,93 @@
+@Library('my-shared-library') _
+
+pipeline {
+    agent { label 'slave-node' } 
+
+    environment {
+        IMAGE_NAME = 'fatmaahassan/java_app'
+        IMAGE_TAG  = "${env.BUILD_NUMBER}"
+        KUBECONFIG = '/home/fatma/.kube/config' 
+    }
+
+    stages {
+        stage('Clone Source') {
+            steps {
+                git branch: 'lab22-jenkins', url: 'https://github.com/FatmaAHassan/Ivolve-Tasks.git'
+            }
+        }
+
+        stage('Run Unit Test') {
+            steps {
+                script {
+                    runUnitTest() 
+                }
+            }
+        }
+
+        stage('Build App') {
+            steps {
+                dir('Jenkins/Lab22/Lab22-App') {
+                    sh "mvn clean package -DskipTests"
+                }
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                dir('Jenkins/Lab22/Lab22-App') {
+                    script {
+                        // بعتنا الاتنين باراميتر للمكتبة
+                        buildImage(IMAGE_NAME, IMAGE_TAG)
+                    }
+                }
+            }
+        }
+
+        stage('Scan Image') {
+            steps {
+                echo "Scanning image for vulnerabilities..."
+                sh "docker inspect ${IMAGE_NAME}:${IMAGE_TAG} || true"
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_CREDS_USR', passwordVariable: 'DOCKER_CREDS_PSW')]) {
+                    sh "echo $DOCKER_CREDS_PSW | docker login -u $DOCKER_CREDS_USR --password-stdin"
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Remove Image Locally') {
+            steps {
+                script {
+                    // ناديتها كـ script عشان نبعت الباراميترز صح
+                    removeImage(IMAGE_NAME, IMAGE_TAG)
+                }
+            }
+        }
+
+        stage('Deploy On K8s') {
+            steps {
+                dir('Jenkins/Lab22/Lab22-App') {
+                    script {
+                        deployK8s(IMAGE_NAME, IMAGE_TAG)  
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished."
+        }
+        success {
+            echo "Application deployed successfully!"
+        }
+        failure {
+            echo "Pipeline failed. Check logs for details."
+        }
+    }
+}
