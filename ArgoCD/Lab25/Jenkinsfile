@@ -17,7 +17,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $DOCKER_IMAGE:$TAG ."
+                sh "docker build -t $DOCKER_IMAGE:$TAG ./Jenkins_App"
             }
         }
 
