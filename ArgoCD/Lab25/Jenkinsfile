@@ -7,13 +7,14 @@ pipeline {
         GITOPS_REPO = "https://github.com/FatmaAHassan/gitops-argocd-lab25.git"
     }
 
-    stages {
-        stage('Build App') {
+       stage('Build App') {
             steps {
                 echo 'Building application...'
+                dir('ArgoCD/Lab25/Jenkins_App') {
+                    sh "mvn clean package -DskipTests"
+                }
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t $DOCKER_IMAGE:$TAG ./ArgoCD/Lab25/Jenkins_App"
