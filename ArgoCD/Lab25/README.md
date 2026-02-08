@@ -111,6 +111,7 @@ pipeline {
         }
     }
 }
+```
 
 ---
 
@@ -151,12 +152,12 @@ Kubectl Pods .
 ![Build](screenshots/getpods.jpg)
 
 Jenkins Pipeline stage .
-![Build](screenshots/stahges.jpg)
+![Build](screenshots/stages.jpg)
 
 ArgoCD Dashboard  .
-![Build](screenshots/argobefore.jpg)
+![Build](screenshots/argocdbefore.jpg)
 
-![Build](screenshots/argoafter.jpg)
+![Build](screenshots/argocdafter.jpg)
 
 ---
 
