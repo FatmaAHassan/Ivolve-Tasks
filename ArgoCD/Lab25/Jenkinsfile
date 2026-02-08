@@ -4,14 +4,14 @@ pipeline {
     environment {
         DOCKER_IMAGE = "fatmaahassan/jenkins-app"
         TAG = "${BUILD_NUMBER}"
+        GITOPS_REPO_URL = "github.com/FatmaAHassan/gitops-argocd-lab25.git"
     }
 
     stages {
         stage('Build App') {
             steps {
-                echo 'Building application...'
                 dir('ArgoCD/Lab25/Jenkins_App') {
-                    sh "mvn clean package -DskipTests" 
+                    sh "mvn clean package -DskipTests"
                 }
             }
         }
@@ -27,10 +27,8 @@ pipeline {
         stage('Push Image to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh """
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push $DOCKER_IMAGE:$TAG
-                    """
+                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                    sh "docker push $DOCKER_IMAGE:$TAG"
                 }
             }
         }
@@ -41,24 +39,21 @@ pipeline {
             }
         }
 
-        stage('Update deployment.yaml') {
-            steps {
-                sh """
-                sed -i 's|image:.*|image: $DOCKER_IMAGE:$TAG|' ArgoCD/Lab25/gitops-argocd-lab25/deployment.yaml
-                """
-            }
-        }
-
-        stage('Push to GitOps Repo') {
+        stage('Update & Push to GitOps Repo') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-token', passwordVariable: 'GIT_PASS', usernameVariable: 'GIT_USER')]) {
                     sh """
-                    cd ArgoCD/Lab25/gitops-argocd-lab25
+                    rm -rf gitops-argocd-lab25
+                    git clone https://${GIT_USER}:${GIT_PASS}@${GITOPS_REPO_URL}
+                    
+                    cd gitops-argocd-lab25
+                    sed -i 's|image:.*|image: $DOCKER_IMAGE:$TAG|' deployment.yaml
+                    
                     git config user.email "jenkins@lab.com"
                     git config user.name "jenkins"
                     git add deployment.yaml
-                    git commit -m "Update image to $TAG"
-                    git push https://${GIT_USER}:${GIT_PASS}@github.com/FatmaAHassan/Ivolve-Tasks.git HEAD:main
+                    git commit -m "Update image to version $TAG"
+                    git push origin main
                     """
                 }
             }
