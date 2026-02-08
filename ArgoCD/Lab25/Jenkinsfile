@@ -4,30 +4,29 @@ pipeline {
     environment {
         DOCKER_IMAGE = "fatmaahassana/jenkins-app"
         TAG = "${BUILD_NUMBER}"
-        GITOPS_REPO = "https://github.com/FatmaAHassan/gitops-argocd-lab25.git"
     }
 
-       stage('Build App') {
+    stages {
+        stage('Build App') {
             steps {
                 echo 'Building application...'
                 dir('ArgoCD/Lab25/Jenkins_App') {
-                    sh "mvn clean package -DskipTests"
+                    sh "mvn clean package -DskipTests" 
                 }
             }
         }
+
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $DOCKER_IMAGE:$TAG ./ArgoCD/Lab25/Jenkins_App"
+                dir('ArgoCD/Lab25/Jenkins_App') {
+                    sh "docker build -t $DOCKER_IMAGE:$TAG ."
+                }
             }
         }
 
         stage('Push Image to DockerHub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                     echo $PASS | docker login -u $USER --password-stdin
                     docker push $DOCKER_IMAGE:$TAG
