@@ -1,0 +1,26 @@
+---
+- name: Configure Web Server using Ansible
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Start nginx
+      shell: "/etc/init.d/nginx start"
+
+    - name: Deploy custom web page
+      copy:
+        content: |
+          <html>
+          <body>
+            <h1>Lab 27 - Ansible + Docker 🚀</h1>
+            <p>Nginx installed using Ansible Playbook</p>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+
