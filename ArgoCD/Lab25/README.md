@@ -155,7 +155,7 @@ Jenkins Pipeline stage .
 ![Build](screenshots/stages.jpg)
 
 ArgoCD Dashboard  .
-![Build](screenshots/argocdbefore.jpg)
+![Build](screenshots/argoscdbefore.jpg)
 
 ![Build](screenshots/argocdafter.jpg)
 
