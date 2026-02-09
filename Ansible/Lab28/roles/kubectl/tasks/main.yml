@@ -1,0 +1,20 @@
+- name: Get latest kubectl version
+  command: curl -L -s https://dl.k8s.io/release/stable.txt
+  register: kubectl_version
+  ignore_errors: yes
+
+- name: Download kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version.stdout | default('v1.35.0') }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+  ignore_errors: yes
+
+- name: Verify kubectl version
+  command: kubectl version --client
+  register: kubectl_check
+  ignore_errors: yes
+
+- debug:
+    var: kubectl_check.stdout
+

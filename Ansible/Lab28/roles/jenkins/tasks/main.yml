@@ -1,0 +1,31 @@
+---
+- name: Clean everything Jenkins
+  shell: |
+    rm -f /etc/apt/sources.list.d/jenkins.list
+    rm -f /etc/apt/trusted.gpg.d/jenkins.gpg
+    apt-key del 7198F4B714ABFC68 || true
+  become: yes
+
+- name: Download Key to a specific location
+  get_url:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    dest: /usr/share/keyrings/jenkins-keyring.asc
+    mode: '0644'
+
+- name: Add Jenkins Repo with Trusted Option
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+    state: present
+    update_cache: no
+    filename: jenkins
+
+- name: Force Update and Install Jenkins (The Emergency Way)
+  shell: |
+    apt-get update -o Acquire::AllowInsecureRepositories=true || true
+    apt-get install -y jenkins --allow-unauthenticated
+  become: yes
+
+- name: Ensure Jenkins is started
+  service:
+    name: jenkins
+    state: started

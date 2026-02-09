@@ -1,0 +1,11 @@
+---
+- name: Download Docker Key
+  shell: "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor --yes -o /usr/share/keyrings/docker.gpg"
+  become: yes
+
+- name: Add Docker Repo
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable"
+    state: present
+    update_cache: yes
+    filename: docker-stable
